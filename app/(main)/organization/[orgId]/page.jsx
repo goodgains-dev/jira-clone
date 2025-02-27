@@ -4,6 +4,8 @@ import { getOrganization } from "@/actions/organizations";
 import OrgSwitcher from "@/components/org-switcher";
 import ProjectList from "./_components/project-list";
 import UserIssues from "./_components/user-issues";
+import Link from "next/link";
+import { BarChart, FileEdit, Building2 } from "lucide-react";
 
 export default async function OrganizationPage({ params }) {
   const { orgId } = params;
@@ -26,7 +28,30 @@ export default async function OrganizationPage({ params }) {
           {organization.name}&rsquo;s Projects
         </h1>
 
-        <OrgSwitcher />
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/organization/${organization.id}/analytics`}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          >
+            <BarChart size={18} />
+            <span>Analytics</span>
+          </Link>
+          <Link
+            href={`/organization/${organization.id}/form-builder`}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
+          >
+            <FileEdit size={18} />
+            <span>Form Builder</span>
+          </Link>
+          <Link
+            href={`/organization/${organization.id}/departments`}
+            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+          >
+            <Building2 size={18} />
+            <span>Departments</span>
+          </Link>
+          <OrgSwitcher />
+        </div>
       </div>
       <div className="mb-4">
         <ProjectList orgId={organization.id} />

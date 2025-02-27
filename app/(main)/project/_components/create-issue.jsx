@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BarLoader } from "react-spinners";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -23,7 +24,9 @@ import MDEditor from "@uiw/react-md-editor";
 import useFetch from "@/hooks/use-fetch";
 import { createIssue } from "@/actions/issues";
 import { getOrganizationUsers } from "@/actions/organizations";
+import { getDepartments } from "@/actions/departments";
 import { issueSchema } from "@/app/lib/validators";
+import { toast } from "sonner";
 
 export default function IssueCreationDrawer({
   isOpen,
@@ -34,6 +37,11 @@ export default function IssueCreationDrawer({
   onIssueCreated,
   orgId,
 }) {
+  // Initialize state with default values instead of accessing issue.status
+  // Use status from props instead of issue.status
+  const [issueStatus, setIssueStatus] = useState(status || "TODO");
+  const [issuePriority, setIssuePriority] = useState("MEDIUM");
+
   const {
     loading: createIssueLoading,
     fn: createIssueFn,
@@ -48,17 +56,26 @@ export default function IssueCreationDrawer({
   } = useFetch(getOrganizationUsers);
 
   const {
+    loading: departmentsLoading,
+    fn: fetchDepartments,
+    data: departments,
+  } = useFetch(getDepartments);
+
+
+  const {
     control,
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm({
     resolver: zodResolver(issueSchema),
     defaultValues: {
       priority: "MEDIUM",
       description: "",
       assigneeId: "",
+      departmentId: "",
     },
   });
 
@@ -66,15 +83,25 @@ export default function IssueCreationDrawer({
     if (isOpen && orgId) {
       fetchUsers(orgId);
     }
-  }, [isOpen, orgId]);
+    
+    if (isOpen && projectId) {
+      fetchDepartments(projectId);
+    }
+  }, [isOpen, orgId, projectId, fetchUsers, fetchDepartments]);
 
   const onSubmit = async (data) => {
-    await createIssueFn(projectId, {
+    // Convert "none" to null for departmentId
+    const processedData = {
       ...data,
-      status,
+      departmentId: data.departmentId === "none" ? null : data.departmentId,
+      status: issueStatus,
+      priority: issuePriority,
       sprintId,
-    });
+    };
+    
+    await createIssueFn(projectId, processedData);
   };
+
 
   useEffect(() => {
     if (newIssue) {
@@ -83,7 +110,8 @@ export default function IssueCreationDrawer({
       onIssueCreated();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newIssue, createIssueLoading]);
+  }, [newIssue]);
+
 
   return (
     <Drawer open={isOpen} onClose={onClose}>
@@ -183,6 +211,40 @@ export default function IssueCreationDrawer({
                 </Select>
               )}
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="departmentId"
+              className="block text-sm font-medium mb-1"
+            >
+              Department
+            </label>
+            <Controller
+              name="departmentId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {departments?.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Departments can be created in the Organization&apos;s Departments page
+            </p>
           </div>
 
           {error && <p className="text-red-500 mt-2">{error.message}</p>}

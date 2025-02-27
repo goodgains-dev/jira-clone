@@ -13,15 +13,15 @@ async function Header() {
 
   return (
     <header className="container mx-auto">
-      <nav className="py-6 px-4 flex justify-between items-center">
+      <nav className="py-8 px-4 flex justify-between items-center">
         <Link href="/">
           <h1 className="text-2xl font-bold">
             <Image
               src={"/logo2.png"}
-              alt="Zscrum Logo"
-              width={200}
-              height={56}
-              className="h-10 w-auto object-contain"
+              alt="DESKS Logo"
+              width={900}
+              height={252}
+              className="h-40 w-auto object-contain"
             />
           </h1>
         </Link>

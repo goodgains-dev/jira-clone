@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
+import { MessageCircle, MessageSquare } from "lucide-react";
 import IssueDetailsDialog from "./issue-details-dialog";
 import UserAvatar from "./user-avatar";
 import { useRouter } from "next/navigation";
@@ -61,9 +62,35 @@ export default function IssueCard({
           <Badge variant="outline" className="-ml-1">
             {issue.priority}
           </Badge>
+          {issue.department && (
+            <Badge variant="secondary" className="ml-1">
+              {issue.department.name}
+            </Badge>
+          )}
         </CardContent>
         <CardFooter className="flex flex-col items-start space-y-3">
-          <UserAvatar user={issue.assignee} />
+          <div className="flex justify-between w-full">
+            <UserAvatar user={issue.assignee} />
+            
+            <div className="flex space-x-2">
+              {/* Comment icon with count */}
+              <div className="flex items-center text-gray-400 text-sm">
+                <MessageSquare className="h-4 w-4 mr-1" />
+                <span>{issue.comments?.length || 0}</span>
+              </div>
+              
+              {/* Chat icon */}
+              {issue.conversation && (
+                <MessageCircle
+                  className={`h-4 w-4 ${
+                    issue.conversation?.unreadMessages
+                      ? "text-blue-500 fill-blue-500"
+                      : "text-gray-400"
+                  }`}
+                />
+              )}
+            </div>
+          </div>
 
           <div className="text-xs text-gray-400 w-full">Created {created}</div>
         </CardFooter>

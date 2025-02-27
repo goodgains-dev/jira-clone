@@ -27,4 +27,5 @@ export const issueSchema = z.object({
   assigneeId: z.string().cuid("Please select assignee"),
   description: z.string().optional(),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
+  departmentId: z.string().optional(),
 });
